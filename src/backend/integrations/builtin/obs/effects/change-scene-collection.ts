@@ -14,27 +14,10 @@ export const ChangeSceneCollectionEffectType: EffectType<{
   //language=HTML
   optionsTemplate: `
     <eos-container header="New Scene Collection">
-        <!--<div class="btn-group" uib-dropdown>
-            <button type="button" class="btn btn-default" uib-dropdown-toggle>
-              {{effect.custom ? 'Custom': effect.sceneCollectionName}} <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li role="menuitem" ng-repeat="sceneCollection in sceneCollections" ng-click="selectSceneCollection(sceneCollection)">
-                    <a href>{{sceneCollection}}</a>
-                </li>
-                <li role="menuitem" ng-show="sceneCollections.length < 1" class="muted">
-                    <a>No scene collections found.</a>
-                </li>
-                <li role="separator" class="divider"></li>
-                <li role="menuitem" ng-click="effect.custom = true;">
-                    <a href>Set custom</a>
-                </li>
-            </ul>
-        </div>-->
-        
         <ui-select ng-model="selected" on-select="selectSceneCollection($select.selected)">
           <ui-select-match placeholder="Select a Scene Collection...">{{$select.selected.name}}</ui-select-match>
           <ui-select-choices repeat="collection in sceneCollections | filter: {name: $select.search}">
+            <li ng-show="collection.custom === true" role="separator" class="divider"></li>
             <div ng-bind-html="collection.name | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>
