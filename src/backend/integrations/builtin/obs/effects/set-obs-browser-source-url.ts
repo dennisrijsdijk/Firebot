@@ -16,7 +16,7 @@ export const SetOBSBrowserSourceUrlEffectType: EffectType<{
     <eos-container header="OBS Browser Source">
         <ui-select ng-model="selected" on-select="selectBrowserSource($select.selected.name)">
           <ui-select-match placeholder="Select a Browser Source...">{{$select.selected.name}}</ui-select-match>
-          <ui-select-choices repeat="source.name as source in browserSources | filter: {name: $select.search}">
+          <ui-select-choices repeat="source in browserSources | filter: {name: $select.search}">
             <div ng-bind-html="source.name | highlight: $select.search"></div>
           </ui-select-choices>
           <ui-select-no-choice>
