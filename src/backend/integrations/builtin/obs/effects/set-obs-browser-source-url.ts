@@ -46,7 +46,7 @@ export const SetOBSBrowserSourceUrlEffectType: EffectType<{
         backendCommunicator.fireEventAsync("obs-get-browser-sources")
       ).then((browserSources: OBSSource[]) => {
         $scope.browserSources = browserSources ?? [];
-        $scope.selected = $scope.browserSources.find(source => source.name === $scope.effect.browserSourceName)
+        $scope.selected = $scope.browserSources.find(source => source.name === $scope.effect.browserSourceName);
       });
     };
     $scope.getBrowserSources();

@@ -58,7 +58,8 @@ export const ChangeSceneCollectionEffectType: EffectType<{
           $scope.selected = $scope.customCollection;
         }
         else {
-          $scope.selected = $scope.sceneCollections.find(collection => collection.name === $scope.effect.sceneCollectionName);
+          $scope.selected = $scope.sceneCollections.find(collection =>
+              collection.name === $scope.effect.sceneCollectionName);
         }
       });
     };
