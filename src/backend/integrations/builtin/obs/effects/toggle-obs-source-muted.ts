@@ -24,7 +24,6 @@ export const ToggleSourceMutedEffectType: EffectType<EffectProperties> =
       icon: "fad fa-volume-mute",
       categories: ["common"],
     },
-    //language=HTML
     optionsTemplate: `
     <eos-container header="Audio Sources">
       <firebot-input model="searchText" input-title="Filter"></firebot-input>

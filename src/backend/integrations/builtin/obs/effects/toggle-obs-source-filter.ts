@@ -29,10 +29,8 @@ export const ToggleSourceFilterEffectType: EffectType<EffectProperties> =
       icon: "fad fa-stars",
       categories: ["common"],
     },
-    //language=HTML
     optionsTemplate: `
     <eos-container header="Filters">
-      <!--<firebot-input model="searchText" onchange="filterSources(searchText)" input-title="Filter"></firebot-input>-->
       <div class="effect-setting-container">
         <div class="input-group">
           <span class="input-group-addon">Filter</span>
