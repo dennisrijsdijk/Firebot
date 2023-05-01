@@ -11,7 +11,6 @@ export const ChangeSceneCollectionEffectType: EffectType<{
     icon: "fad fa-th-list",
     categories: ["common"],
   },
-  //language=HTML
   optionsTemplate: `
     <eos-container header="New Scene Collection">
         <ui-select ng-model="selected" on-select="selectSceneCollection($select.selected)">
