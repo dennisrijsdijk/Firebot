@@ -34,7 +34,7 @@ export const ToggleSourceVisibilityEffectType: Firebot.EffectType<EffectProperti
 <eos-container header="Sources">
   <div class="effect-setting-container">
     <div class="input-group">
-      <span class="input-group-addon">Filter by sources:</span>
+      <span class="input-group-addon">Filter</span>
       <input type="text" class="form-control" ng-change="filterScenes(searchText)" ng-model="searchText" placeholder="Enter your search term here..." aria-describeby="obs-visibility-search-box">
     </div>
   </div>

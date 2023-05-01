@@ -24,9 +24,12 @@ export const ToggleSourceMutedEffectType: EffectType<EffectProperties> =
       icon: "fad fa-volume-mute",
       categories: ["common"],
     },
+    //language=HTML
     optionsTemplate: `
     <eos-container header="Audio Sources">
-      <div ng-if="sourceList != null && sourceList.length > 0" ng-repeat="source in sourceList">
+      <firebot-input model="searchText" input-title="Filter"></firebot-input>
+      <br>
+      <div ng-if="sourceList != null && sourceList.length > 0" ng-repeat="source in sourceList | filter: {name: searchText}">
           <label  class="control-fb control--checkbox">{{source.name}}
               <input type="checkbox" ng-click="toggleSourceSelected(source.name)" ng-checked="sourceIsSelected(source.name)"  aria-label="..." >
               <div class="control__indicator"></div>
