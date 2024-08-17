@@ -1,16 +1,37 @@
-"use strict";
+import { AudioOutputDevice, EffectType } from "../../../types/effects";
+import { EffectCategory } from "../../../shared/effect-constants";
+import { settings } from "../../common/settings-access";
+import { wait } from "../../utility";
+import resourceTokenManager from "../../resourceTokenManager";
+import webServer from "../../../server/http-server-manager";
+import fsp from "fs/promises";
+import path from "path";
+import frontendCommunicator from "../../common/frontend-communicator";
+import logger from "../../logwrapper";
 
-const { settings } = require("../../common/settings-access");
-const resourceTokenManager = require("../../resourceTokenManager");
-const webServer = require("../../../server/http-server-manager");
-const fs = require('fs/promises');
-const logger = require("../../logwrapper");
-const path = require("path");
-const frontendCommunicator = require("../../common/frontend-communicator");
-const { EffectCategory } = require('../../../shared/effect-constants');
-const { wait } = require("../../utility");
+interface EffectModel {
+    filepath?: string;
+    folder?: string;
+    url?: string;
+    soundType: "local" | "folderRandom" | "url";
+    volume: number;
+    overlayInstance?: string;
+    waitForSound: boolean;
+    audioOutputDevice: AudioOutputDevice;
+}
 
-const playSound = {
+interface OverlayData {
+    filepath: string;
+    url: string;
+    isUrl: boolean;
+    volume: number;
+    overlayInstance?: string;
+    resourceToken?: string;
+    audioOutputDevice: AudioOutputDevice;
+    [x: string]: unknown; // Needed for sendToOverlay
+}
+
+const model: EffectType<EffectModel, OverlayData> = {
     definition: {
         id: "firebot:playsound",
         name: "Play Sound",
@@ -19,7 +40,6 @@ const playSound = {
         categories: [EffectCategory.COMMON],
         dependencies: []
     },
-    globalSettings: {},
     optionsTemplate: `
     <eos-container header="Type">
         <firebot-radios
@@ -103,19 +123,26 @@ const playSound = {
             effect.soundType = "local";
         }
 
-        const data = {
+        // Set output device.
+        let selectedOutputDevice = effect.audioOutputDevice;
+        if (selectedOutputDevice == null || selectedOutputDevice.label === "App Default") {
+            selectedOutputDevice = settings.getAudioOutputDevice();
+        }
+
+        const data: OverlayData = {
             filepath: effect.filepath,
             url: effect.url,
             isUrl: effect.soundType === "url",
             volume: effect.volume,
-            overlayInstance: effect.overlayInstance
+            overlayInstance: effect.overlayInstance,
+            audioOutputDevice: selectedOutputDevice
         };
 
         // Get random sound
         if (effect.soundType === "folderRandom") {
             let files = [];
             try {
-                files = await fs.readdir(effect.folder);
+                files = await fsp.readdir(effect.folder);
             } catch (err) {
                 logger.warn("Unable to read sound folder", err);
             }
@@ -129,13 +156,6 @@ const playSound = {
 
             data.filepath = path.join(effect.folder, chosenFile);
         }
-
-        // Set output device.
-        let selectedOutputDevice = effect.audioOutputDevice;
-        if (selectedOutputDevice == null || selectedOutputDevice.label === "App Default") {
-            selectedOutputDevice = settings.getAudioOutputDevice();
-        }
-        data.audioOutputDevice = selectedOutputDevice;
 
         // Generate token if going to overlay, otherwise send to gui.
         if (selectedOutputDevice.deviceId === "overlay") {
@@ -151,12 +171,13 @@ const playSound = {
             webServer.sendToOverlay("sound", data);
         } else {
             // Send data back to media.js in the gui.
+            // @ts-expect-error renderWindow is not defined
             renderWindow.webContents.send("playsound", data);
         }
 
         if (effect.waitForSound) {
             try {
-                const duration = await frontendCommunicator.fireEventAsync("getSoundDuration", {
+                const duration: number = await frontendCommunicator.fireEventAsync("getSoundDuration", {
                     path: data.isUrl ? data.url : data.filepath
                 });
 
@@ -193,8 +214,8 @@ const playSound = {
         return true;
     },
     /**
-   * Code to run in the overlay
-   */
+     * Code to run in the overlay
+     */
     overlayExtension: {
         dependencies: {
             css: [],
@@ -213,34 +234,21 @@ const playSound = {
                 // eslint-disable-next-line no-undef
                 const uuid = uuidv4();
 
-                const filepath = data.isUrl ? data.url : data.filepath.toLowerCase();
-                let mediaType;
-                if (filepath.endsWith("mp3")) {
-                    mediaType = "audio/mpeg";
-                } else if (filepath.endsWith("ogg")) {
-                    mediaType = "audio/ogg";
-                } else if (filepath.endsWith("wav")) {
-                    mediaType = "audio/wav";
-                } else if (filepath.endsWith("flac")) {
-                    mediaType = "audio/flac";
-                }
-
-                const audioElement = `<audio id="${uuid}" src="${data.isUrl ? data.url : resourcePath}" type="${mediaType}"></audio>`;
+                const audioElement = document.createElement("audio") as HTMLAudioElement;
+                audioElement.id = uuid;
+                audioElement.src = data.isUrl ? data.url : resourcePath;
+                audioElement.volume = parseFloat(data.volume) / 10;
+                audioElement.oncanplay = () => audioElement.play();
+                audioElement.onended = () => {
+                    audioElement.remove();
+                };
 
                 // Throw audio element on page.
-                $("#wrapper").append(audioElement);
-
-                const audio = document.getElementById(uuid);
-                audio.volume = parseFloat(data.volume) / 10;
-
-                audio.oncanplay = () => audio.play();
-
-                audio.onended = () => {
-                    $(`#${uuid}`).remove();
-                };
+                const wrapper = document.getElementById("wrapper");
+                wrapper.append(audioElement);
             }
         }
     }
 };
 
-module.exports = playSound;
+module.exports = model;

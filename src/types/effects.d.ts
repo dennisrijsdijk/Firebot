@@ -3,6 +3,11 @@ import ng from "angular";
 
 type Func<T> = (...args: unknown[]) => T;
 
+export interface AudioOutputDevice {
+    deviceId: string;
+    label: string;
+}
+
 interface EffectScope<EffectModel> extends ng.IScope {
     effect: EffectModel;
     [x: string]: any;
