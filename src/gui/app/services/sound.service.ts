@@ -1,15 +1,33 @@
-"use strict";
+import { Howl, Howler } from "howler";
+import { AudioOutputDevice } from "../../../types/effects";
 
-(function() {
+export interface NotificationSoundOpiton {
+    name: string;
+    path: string;
+}
 
-    const { Howl, Howler } = require("howler");
+export interface SoundService {
+    connectSound: (type: "Online" | "Offline") => void;
+    popSound: () => void;
+    resetPopCounter: () => void;
+    playChatNotification: () => void;
+    playSound: (path: string, volume: number, outputDevice?: AudioOutputDevice, fileType?: string, maxSoundLength?: string) => void;
+    getHowlSound: (path: string, volume: number, outputDevice: AudioOutputDevice, fileType?: string) => Promise<Howl>;
+    getSoundDuration: (path: string, format?: string) => Promise<number>;
+    stopAllSounds: () => void;
+    notificationSoundOptions: Array<NotificationSoundOpiton>;
+}
+
+(function(angular) {
 
     // This provides methods for playing sounds
 
     angular
         .module("firebotApp")
         .factory("soundService", function(logger, settingsService, listenerService, $q, websocketService, backendCommunicator) {
-            const service = {};
+            const service: Partial<SoundService> = {};
+
+            const soundCache: Record<string, Howl> = {};
 
             // Connection Sounds
             service.connectSound = function(type) {
@@ -105,19 +123,19 @@
                 }
 
                 $q.when(service.getHowlSound(path, volume, outputDevice, fileType))
-                    .then(sound => {
+                    .then((sound) => {
 
                         let maxSoundLengthTimeout;
                         // Clear listener after first call.
                         sound.once('load', function() {
                             sound.play();
 
-                            const intMaxSoundLength = parseInt(maxSoundLength);
-                            if (intMaxSoundLength > 0) {
+                            const numberMaxSoundLength = parseFloat(maxSoundLength);
+                            if (numberMaxSoundLength > 0) {
                                 maxSoundLengthTimeout = setTimeout(function() {
                                     sound.stop();
                                     sound.unload();
-                                }, maxSoundLength * 1000);
+                                }, numberMaxSoundLength * 1000);
                             }
                         });
 
@@ -133,7 +151,7 @@
 
             service.getHowlSound = function(path, volume, outputDevice = settingsService.getAudioOutputDevice(), fileType = null) {
                 return navigator.mediaDevices.enumerateDevices()
-                    .then(deviceList => {
+                    .then((deviceList) => {
                         const filteredDevice = deviceList.filter(d => d.label === outputDevice.label
                             || d.deviceId === outputDevice.deviceId);
 
@@ -153,18 +171,17 @@
             };
 
             service.getSoundDuration = function(path, format = undefined) {
-                return new Promise(resolve => {
-
-                    console.log("duration for", path, format);
-
+                return new Promise((resolve) => {
                     const sound = new Howl({
                         src: [path],
                         format: format || [],
                         onload: () => {
+                            logger.debug(`Sound duration for ${format == null ? path : `${path} (${format})`}: ${sound.duration()}`);
                             resolve(sound.duration());
                             sound.unload();
                         },
                         onloaderror: () => {
+                            logger.error(`Unable to get sound duration for ${format == null ? path : `${path} (${format})`}, defaulting to 0`);
                             resolve(0);
                         }
                     });
@@ -178,7 +195,7 @@
             // Watches for an event from main process
             listenerService.registerListener(
                 { type: listenerService.ListenerType.PLAY_SOUND },
-                data => {
+                (data) => {
                     const filepath = data.filepath;
                     const volume = data.volume / 100 * 10;
 
@@ -219,10 +236,44 @@
                 service.stopAllSounds();
             });
 
+            backendCommunicator.onAsync("play-sound", async ({ path, volume, outputDevice, fileType = null, maxSoundLength = null }) => {
+                const id = uuidv4();
+                if (outputDevice == null) {
+                    outputDevice = settingsService.getAudioOutputDevice();
+                }
+
+                const sound = await service.getHowlSound(path, volume, outputDevice, fileType);
+
+                let maxSoundLengthTimeout;
+                // Clear listener after first call.
+                sound.once('load', function() {
+                    sound.play();
+
+                    const intMaxSoundLength = parseFloat(maxSoundLength);
+                    if (intMaxSoundLength > 0) {
+                        maxSoundLengthTimeout = setTimeout(function() {
+                            sound.stop();
+                            sound.unload();
+                        }, maxSoundLength * 1000);
+                    }
+                });
+
+                // Fires when the sound finishes playing.
+                sound.once('end', function() {
+                    sound.unload();
+                    delete soundCache[id];
+                    clearInterval(maxSoundLengthTimeout);
+                });
+
+                soundCache[id] = sound;
+
+                sound.load();
+            });
+
             // Note(ebiggz): After updating to latest electron (7.1.9), initial sounds have a noticable delay, almost as if theres a warm up time.
             // This gets around that by playing a sound with no audio right at app start, to trigger audio library warm up
             service.playSound("../sounds/secofsilence.mp3", 0.0);
 
-            return service;
+            return service as SoundService;
         });
 }(window.angular));
