@@ -56,3 +56,12 @@ export interface AdBreakService {
 
     updateDuration: () => void;
 }
+
+export interface BackendCommunicator {
+    on: <ExpectedArgs extends Array<unknown> = [], ReturnPayload = void>(eventName: string, callback: (...args: ExpectedArgs) => ReturnPayload, async = false) => string;
+    onAsync: <ExpectedArgs extends Array<unknown> = [], ReturnPayload = void>(eventName: string, callback: (...args: ExpectedArgs) => Promise<ReturnPayload>) => string;
+    fireEventAsync: <ReturnPayload = void>(eventName: string, data: unknown) => Promise<ReturnPayload>;
+    fireEventSync: <ReturnPayload = void>(eventName: string, data: unknown) => ReturnPayload;
+    fireEvent: (eventName: string, data: unknown) => unknown;
+    send: (eventName: string, data: unknown) => unknown;
+}
