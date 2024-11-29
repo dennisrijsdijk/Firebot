@@ -65,3 +65,12 @@ export interface BackendCommunicator {
     fireEvent: (eventName: string, data: unknown) => unknown;
     send: (eventName: string, data: unknown) => unknown;
 }
+
+export interface BackupService {
+    BACKUPS_FOLDER_PATH: string;
+
+    startBackup: () => void;
+    openBackupZipFilePicker: () => Promise<string>;
+    initiateBackupRestore: (backupFilePath: string) => void;
+    restoreBackup: (backupFilePath) => Promise<{ success: boolean; reason?: string; }>;
+}
