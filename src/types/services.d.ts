@@ -45,3 +45,14 @@ export interface ActivityFeedService {
     retriggerEvent: (activityId: string) => void;
     showEditActivityFeedEventsModal: () => void;
 }
+
+export interface AdBreakService {
+    showAdBreakTimer: boolean;
+    adRunning: boolean;
+    nextAdBreak: string;
+    endsAt: string;
+    adDuration: number;
+    friendlyDuration: string;
+
+    updateDuration: () => void;
+}
