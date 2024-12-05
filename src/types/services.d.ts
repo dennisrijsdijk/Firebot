@@ -1,3 +1,5 @@
+import { RewardRedemption, SavedChannelReward } from "./channel-rewards";
+
 export interface AccountAccessService {
     accounts: {
         streamer: {
@@ -73,4 +75,26 @@ export interface BackupService {
     openBackupZipFilePicker: () => Promise<string>;
     initiateBackupRestore: (backupFilePath: string) => void;
     restoreBackup: (backupFilePath) => Promise<{ success: boolean; reason?: string; }>;
+}
+
+export interface ChannelRewardsService {
+    channelRewards: SavedChannelReward[];
+    redemptions: Record<string, RewardRedemption[]>;
+    selectedSortTag: null | string;
+    searchQuery: string;
+    loadingRedemptions: boolean;
+
+    loadChannelRewards: () => void;
+    saveChannelReward: (channelReward: SavedChannelReward) => Promise<boolean>;
+    saveAllRewards: (channelRewards: SavedChannelReward[], updateTwitch = false) => void;
+    deleteChannelReward: (channelRewardId: string) => void;
+    showAddOrEditRewardModal: (reward: SavedChannelReward) => void;
+    manuallyTriggerReward: (itemId: string) => void;
+    channelRewardNameExists: (name: string) => boolean;
+    duplicateChannelReward: (rewardId: string) => void;
+    syncChannelRewards: () => void;
+    refreshChannelRewardRedemptions: () => void;
+    getRewardIdsWithRedemptions: () => string[];
+    approveOrRejectChannelRewardRedemptions: (rewardId: string, redemptionIds: string[], approve = true) => Promise<void>;
+    approveOrRejectAllRedemptionsForChannelRewards: (rewardIds: string[], approve = true) => Promise<void>;
 }

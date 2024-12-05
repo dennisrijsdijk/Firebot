@@ -13,6 +13,16 @@ export type SavedChannelReward = {
     autoApproveRedemptions?: boolean,
 };
 
+export type RewardRedemption = {
+    id: string;
+    rewardId: string;
+    redemptionDate: Date;
+    userId: string;
+    userName: string;
+    userDisplayName: string;
+    rewardMessage?: string;
+}
+
 export type RewardRedemptionMetadata = {
     username: string,
     userId: string,

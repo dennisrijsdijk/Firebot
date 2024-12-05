@@ -9,6 +9,7 @@ import {
     HelixCustomRewardRedemptionFilter
 } from "@twurple/api";
 import { chunkArray } from "../../utils/chunkArray";
+import { RewardRedemption } from "../../../types/channel-rewards";
 
 export interface ImageSet {
     url1x: string;
@@ -46,16 +47,6 @@ export interface CustomReward {
     shouldRedemptionsSkipRequestQueue: boolean;
     redemptionsRedeemedCurrentStream?: number;
     cooldownExpiresAt?: Date;
-}
-
-export interface RewardRedemption {
-    id: string;
-    rewardId: string;
-    redemptionDate: Date;
-    userId: string;
-    userName: string;
-    userDisplayName: string;
-    rewardMessage?: string;
 }
 
 export interface RewardRedemptionsApprovalRequest {

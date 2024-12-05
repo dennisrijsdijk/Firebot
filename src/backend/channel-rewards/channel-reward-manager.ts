@@ -4,8 +4,9 @@ import accountAccess from "../common/account-access";
 import profileManager from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
 import twitchApi from "../twitch-api/api";
-import activeUserHandler from "../chat/chat-listeners/active-user-handler"
-import { CustomReward, RewardRedemption, RewardRedemptionsApprovalRequest } from "../twitch-api/resource/channel-rewards";
+import activeUserHandler from "../chat/chat-listeners/active-user-handler";
+import { CustomReward, RewardRedemptionsApprovalRequest } from "../twitch-api/resource/channel-rewards";
+import { RewardRedemption } from "../../types/channel-rewards";
 import { EffectTrigger } from "../../shared/effect-constants";
 import { RewardRedemptionMetadata, SavedChannelReward } from "../../types/channel-rewards";
 import { TriggerType } from "../common/EffectType";
