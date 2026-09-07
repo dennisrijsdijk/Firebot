@@ -425,7 +425,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                 profilePicUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/4fe04c1f-8390-4ded-bcb0-cae9b1d7cb9c-profile_image-70x70.png",
                 pronouns: "He/Him",
                 color: "#0066FF",
-                rawText: "Wow, this IS really neat! zunder2Wow",
+                rawText: "Wow, this IS really neat! zunder2Wow Cheer100",
                 badges: [
                     {
                         title: "broadcaster",
@@ -441,6 +441,18 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                         type: "emote",
                         url: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_ad007f2d2f77444295c883b0a6eaf572/static/light/3.0",
                         name: "zunder2Wow"
+                    },
+                    {
+                        type: "text",
+                        text: " "
+                    },
+                    {
+                        type: "cheermote",
+                        text: "Cheer100",
+                        name: "Cheer",
+                        amount: 100,
+                        animatedUrl: "https://d3aqoihi2n8ty8.cloudfront.net/actions/cheer/dark/animated/100/1.gif",
+                        color: "#9C3EE8"
                     }
                 ],
                 action: false,
@@ -813,6 +825,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                             break;
 
                         case "cheermote":
+                        case "cheer": // Back-compat with IRC chat
                             {
                                 const cheermoteElem = document.createElement("img");
                                 cheermoteElem.src = (part.animatedUrl ?? part.url)!;
