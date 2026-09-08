@@ -23,6 +23,8 @@ export type ChatWidgetSettings = {
     messageExitAnimation?: Animation;
     messageStyle: "compact" | "modern";
     chatOrder: "normal" | "reversed";
+    /** The type of the chat (vertical or horizontal, undefined = vertical) */
+    chatType: "vertical" | "horizontal" | undefined;
     actionDisplayFormat: "modern" | "classic";
     highlightStyle: "normal" | "highlighted";
     highlightColor?: string;
@@ -215,16 +217,31 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                 {
                     value: "normal",
                     label: "Normal",
-                    description: "New messages will appear at the bottom of the chat feed",
+                    description: "New messages will appear at the end of the chat feed (bottom for vertical, right for horizontal)",
                     iconClass: "fa-sort-amount-down-alt"
                 },
                 {
                     value: "reversed",
                     label: "Reversed",
-                    description: "New messages will appear at the top of the chat feed",
+                    description: "New messages will appear at the start of the chat feed (top for vertical, left for horizontal)",
                     iconClass: "fa-sort-amount-up"
                 }
             ]
+        },
+        {
+            name: "chatType",
+            title: "Chat Type",
+            description: "The type of chat widget",
+            type: "radio-cards",
+            default: "vertical",
+            options: [{
+                value: "vertical", label: "Vertical", iconClass: "fa-arrows-alt-v"
+            }, {
+                value: "horizontal", label: "Horizontal", iconClass: "fa-arrows-alt-h"
+            }],
+            settings: {
+                gridColumns: 2
+            }
         },
         {
             name: "actionDisplayFormat",
@@ -894,6 +911,9 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                     default:
                         switch (config.settings.verticalAlignment) {
                             case "bottom":
+                                if (config.settings.chatType === "horizontal") {
+                                    anchorToBottom = true;
+                                }
                                 height = "100%";
                                 maxHeight = "100%";
                                 justifyContent = "end";
@@ -907,15 +927,23 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                         break;
                 }
 
+                let flexDirection = config.settings.chatType === "horizontal" ? "row" : "column";
+                flexDirection = config.settings.chatOrder === "reversed" ? `${flexDirection}-reverse` : flexDirection;
+
                 const chatContainerStyles: Record<string, string> = {
                     "display": "flex",
-                    "flex-direction": config.settings.chatOrder === "reversed" ? "column-reverse" : "column",
+                    "flex-direction": flexDirection,
                     "align-items": config.settings.horizontalAlignment === "right" ? "end" : "start",
                     "justify-content": justifyContent,
                     "height": height,
                     "width": "100%",
                     "text-align": config.settings.horizontalAlignment
                 };
+
+                if (config.settings.chatType === "horizontal") {
+                    chatContainerStyles["text-wrap"] = "nowrap";
+                    chatContainerStyles["align-items"] = "end";
+                }
 
                 if (!!maxHeight?.length) {
                     chatContainerStyles["max-height"] = maxHeight;
@@ -1006,6 +1034,10 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                     "font-style": config.settings?.actionDisplayFormat === "classic" ? "normal" : "italic"
                 };
 
+                const chatMargin = config.settings.chatType === "horizontal" ?
+                    config.settings.chatOrder === "reversed" ? "right" : "left" :
+                    config.settings.chatOrder === "reversed" ? "bottom" : "top";
+
                 const styleMarkup = `
                     <style>
                         .chat-${config.id} {
@@ -1017,7 +1049,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                         }
 
                         .chat-${config.id} > div + div {
-                            ${config.settings.chatOrder === "reversed" ? "margin-bottom" : "margin-top"}: ${config.settings.spaceBetweenMessages ?? 5}px;
+                            margin-${chatMargin}: ${config.settings.spaceBetweenMessages ?? 5}px;
                         }
 
                         .chat-message-root-container-${config.id} {
