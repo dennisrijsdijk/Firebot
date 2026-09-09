@@ -348,6 +348,12 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
             }],
             settings: {
                 gridColumns: 2
+            },
+            showIf: {
+                chatType: [
+                    "vertical",
+                    undefined
+                ]
             }
         },
         {
@@ -930,14 +936,16 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                 let flexDirection = config.settings.chatType === "horizontal" ? "row" : "column";
                 flexDirection = config.settings.chatOrder === "reversed" ? `${flexDirection}-reverse` : flexDirection;
 
+                const horizontalAlignment = config.settings.chatType === "horizontal" ? "left" : config.settings.horizontalAlignment;
+
                 const chatContainerStyles: Record<string, string> = {
                     "display": "flex",
                     "flex-direction": flexDirection,
-                    "align-items": config.settings.horizontalAlignment === "right" ? "end" : "start",
+                    "align-items": horizontalAlignment === "right" ? "end" : "start",
                     "justify-content": justifyContent,
                     "height": height,
                     "width": "100%",
-                    "text-align": config.settings.horizontalAlignment
+                    "text-align": horizontalAlignment
                 };
 
                 if (config.settings.chatType === "horizontal") {
@@ -957,7 +965,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                 const messageRootContainerStyles: Record<string, string> = {
                     "display": "flex",
                     "gap": "10px",
-                    "flex-direction": config.settings.horizontalAlignment === "right"
+                    "flex-direction": horizontalAlignment === "right"
                         ? "row-reverse"
                         : "row"
                 };
