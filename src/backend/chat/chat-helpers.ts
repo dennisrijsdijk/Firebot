@@ -75,8 +75,12 @@ class FirebotChatHelpers {
                     if (this.URL_REGEX.test(word)) {
                         subParts.push({
                             type: "link",
-                            text: `${word} `,
+                            text: word,
                             url: word.startsWith("http") ? word : `https://${word}`
+                        });
+                        subParts.push({
+                            type: "text",
+                            text: " "
                         });
                         continue;
                     }
