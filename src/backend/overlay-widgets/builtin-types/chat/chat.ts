@@ -25,8 +25,7 @@ export type ChatWidgetSettings = {
     messageExitAnimation?: Animation;
     messageStyle: "compact" | "modern";
     chatOrder: "normal" | "reversed";
-    /** The type of the chat (vertical or horizontal, undefined = vertical) */
-    chatType: "vertical" | "horizontal" | undefined;
+    orientation: "vertical" | "horizontal" | undefined;
     actionDisplayFormat: "modern" | "classic";
     highlightStyle: "normal" | "highlighted";
     highlightColor?: string;
@@ -231,9 +230,8 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
             ]
         },
         {
-            name: "chatType",
-            title: "Chat Type",
-            description: "The type of chat widget",
+            name: "orientation",
+            title: "Orientation",
             type: "radio-cards",
             default: "vertical",
             options: [{
@@ -352,7 +350,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                 gridColumns: 2
             },
             showIf: {
-                chatType: [
+                orientation: [
                     "vertical",
                     undefined
                 ]
@@ -754,7 +752,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                     default:
                         switch (config.settings.verticalAlignment) {
                             case "bottom":
-                                if (config.settings.chatType === "horizontal") {
+                                if (config.settings.orientation === "horizontal") {
                                     anchorToBottom = true;
                                 }
                                 height = "100%";
@@ -770,10 +768,10 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                         break;
                 }
 
-                let flexDirection = config.settings.chatType === "horizontal" ? "row" : "column";
+                let flexDirection = config.settings.orientation === "horizontal" ? "row" : "column";
                 flexDirection = config.settings.chatOrder === "reversed" ? `${flexDirection}-reverse` : flexDirection;
 
-                const horizontalAlignment = config.settings.chatType === "horizontal" ? "left" : config.settings.horizontalAlignment;
+                const horizontalAlignment = config.settings.orientation === "horizontal" ? "left" : config.settings.horizontalAlignment;
 
                 const chatContainerStyles: Record<string, string> = {
                     "display": "flex",
@@ -785,7 +783,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                     "text-align": horizontalAlignment
                 };
 
-                if (config.settings.chatType === "horizontal") {
+                if (config.settings.orientation === "horizontal") {
                     chatContainerStyles["text-wrap"] = "nowrap";
                     chatContainerStyles["align-items"] = "end";
                 }
@@ -883,7 +881,7 @@ export const chat: OverlayWidgetType<ChatWidgetSettings, ChatWidgetState> = {
                     "font-style": config.settings?.actionDisplayFormat === "classic" ? "normal" : "italic"
                 };
 
-                const chatMargin = config.settings.chatType === "horizontal" ?
+                const chatMargin = config.settings.orientation === "horizontal" ?
                     config.settings.chatOrder === "reversed" ? "right" : "left" :
                     config.settings.chatOrder === "reversed" ? "bottom" : "top";
 
